@@ -398,3 +398,171 @@ module.exports = {
 
 #### 3.提供HTML模版
 ![image](https://github.com/FanWorldBegin/webpack-guilde/blob/master/images/9.png)
+
+## 17.配置多个单页面应用
+* chunks 允许添加多个html文件，分别使用不同的入口文件
+* 可以理解为两个应用
+```javascript
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+  plugins: [
+    new HtmlWebpackPlugin({
+      title: 'Admin',
+      filename: 'admin.html',  //输出文件名字
+      template: 'public/index.html', //使用哪个模板
+      chunks: ["hello"]   //使用hello 编译出来的js
+    }),
+    new HtmlWebpackPlugin({
+      title: 'Index',
+      filename: 'index.html',
+      template: 'public/index.html',
+      chunks: ["app"]   //使用app编译出来的js
+    })
+  ],
+  mode: 'development'
+}
+```
+
+## 18. 使用 loader 来处理 CSS
+
+### 1.安装
+npm install --save-dev css-loader
+
+### 2.配置
+webpack.config.js
+```javascript
+    rules: [
+      {
+        test: /\.m?js$/,
+        exclude: /(node_modules|bower_components)/,
+        use: {
+          loader: 'babel-loader',
+        }
+      },
+      {
+        test: /\.css$/,
+        use: [ 'style-loader', 'css-loader' ]
+      }
+    ]
+  },
+```
+
+### 3. 安装style-loader 需要一起使用
+Adds CSS to the DOM by injecting a <style> tag
+会将css 插入html
+npm install style-loader --save-dev
+
+## 19. 使用 loader 来处理 Sass 和 Less 文件
+
+### 1.安装scss
+npm install sass-loader node-sass  --save-dev
+npm install style-loader css-loader --save-dev
+
+### 2.配置
+* 先执行右边的 loader  sass -css - 处理 
+```javascript
+  module: {
+    rules: [
+      {
+        test: /\.m?js$/,
+        exclude: /(node_modules|bower_components)/,
+        use: {
+          loader: 'babel-loader',
+        }
+      },
+      {
+        test: /\.css$/,
+        use: [ 'style-loader', 'css-loader' ]
+      },
+      {
+        test: /\.(scss|sass)$/,
+        use: [
+          "style-loader", // creates style nodes from JS strings
+          "css-loader", // translates CSS into CommonJS
+          "sass-loader" // compiles Sass to CSS, using Node Sass by default
+        ]
+      },
+      {
+        test: /\.less$/,
+        use: [{
+          loader: 'style-loader' // creates style nodes from JS strings
+        }, {
+          loader: 'css-loader' // translates CSS into CommonJS
+        }, {
+          loader: 'less-loader' // compiles Less to CSS
+        }]
+      }
+    ]
+  },
+```
+
+## 20. 用 mini-css-extract-plugin 把 CSS 分离成文件
+打包后查看源码发现只有js 文件，通过js 控制css, 现在想要抽离css
+### 1. 使用webpack插件抽离css
+* mini-css-extract-plugin
+* 为了避免js 文件过大，引起加载空白
+* 安装
+npm install --save-dev mini-css-extract-plugin
+
+### 2.在plugin 中引入插件
+webpack.config.js
+* 判断是否是生产环境
+const devMode = process.env.NODE_ENV !== 'production';
+```javascript
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const devMode = process.env.NODE_ENV !== 'production';
+  plugins: [
+    ...
+    new MiniCssExtractPlugin({
+      // Options similar to the same options in webpackOptions.output
+      // both options are optional
+      filename: devMode ? '[name].css' : '[name].[hash].css',
+      chunkFilename: devMode ? '[id].css' : '[id].[hash].css',
+    })
+  ],
+```
+
+### 3.配置loader
+MiniCssExtractPlugin.loader 代替style-loader
+![image](https://github.com/FanWorldBegin/webpack-guilde/blob/master/images/10.png)
+
+## 21.启动服务器并实时刷新 webpack-dev-server
+### 1.安装
+npm install webpack-dev-server --save-dev
+### 2. 修改package.json
+```javascript
+  "scripts": {
+    "dev": "npx webpack-dev-server --open",
+    "prod": "NODE_ENV=production npx webpack"
+  },
+
+```
+
+### 3.webpack.config.js
+* 读取dist 下的文件
+```javascript
+  devServer: {
+    contentBase: path.join(__dirname, 'dist'),
+    compress: true,
+    port: 9000
+  },
+```
+
+## 22. 用 clean-webpack-plugin 来清除文件
+dist 放置编译后的文件，旧文件冗余需要清空。
+### 1. 安装
+npm install --save-dev clean-webpack-plugin
+### 2.配置
+webpack.config.js
+```javascript
+  plugins: [
+    new MiniCssExtractPlugin({
+      // Options similar to the same options in webpackOptions.output
+      // both options are optional
+      filename: 'css/[name].css',
+      chunkFilename: 'css/[id].css',
+    }),
+    new CleanWebpackPlugin()
+  ]
+```
+
+## 23.如何打包图片（包含规划编译出的文件的目录结构）
