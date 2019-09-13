@@ -231,4 +231,170 @@ npm install --save-dev @babel/preset-env
 { "debug": true }  --调试模式显示集合包含什么插件
 ![image](https://github.com/FanWorldBegin/webpack-guilde/blob/master/images/4.png)
 
+## 12. devtool false 让编译后的代码可读性强一些
+```javascript
+module.exports = {
+  // entry: "./src/index.js",
+  entry: {
+    app: './src/index.js',
+    hello: './src/hello.js'
+  },
+  devtool: false,
+  ...
+```
 
+## 12. @babelpolyfill
+### 1.简介
+babel只负责语法转换，比如将ES6的语法转换成ES5。但如果有些对象、方法，浏览器本身不支持，比如：
+* 全局对象：Promise、WeakMap 等。
+* 全局静态函数：Array.from、Object.assign 等。
+* 实例方法：比如 Array.prototype.includes 等。
+新版本的浏览器可以识别语法，但低版本的可能会报错，此时，需要引入babel-polyfill来模拟实现这些对象、方法。
+src/index.js
+```javascript
+Object.assign({})
+Array.from([1,2,3])
+new Promise(resolve => console.log('promise'))
+```
+
+### 2.安装
+npm install --save @babel/polyfill
+![image](https://github.com/FanWorldBegin/webpack-guilde/blob/master/images/5.png)
+
+除了在 webpack.config.js 中的 entry 引入 @babel/polyfill 之外，在需要的 src/index.js 等 js 文件最顶部引入 import '@babel/polyfill' 也是一样的。
+
+
+## 13.preset-env 的选项和按须编译
+### 1. 第二种方法配置polyfill - 不在webpack.config.js 中配置
+使用参数useBuitIns： usage  就只打包需要的 按需加载
+
+修改 .babelrc
+```javascript
+{
+  "presets": [['@babel/preset-env', { "debug": true, "useBuiltIns": "usage" }]],
+  "plugins": [["@babel/plugin-proposal-decorators", { "decoratorsBeforeExport": true }]]
+}
+```
+
+
+### 2.在index.js中引入
+import polyfill 默认会加载所有可能用到的polyfill 不管代码中是否用到导致编译体积大
+使用参数useBuitIns： usage  就只打包需要的 按需加载
+
+```javascript
+import '@babel/polyfill'
+```
+
+## 14. @babel/runtime
+引入babel-polyfill会有一定副作用，会造成全局污染比如：
+
+* 引入了新的全局对象：比如Promise、WeakMap等。
+* 修改现有的全局对象：比如修改了Array、String的原型链等。
+* 在应用开发中，上述行为问题不大，基本可控。但如果在库、工具的开发中引入babel-polyfill，则会带来潜在的问题。
+
+使用 @babel/runtime 解决不用全局变量替换，不会污染其他包的promise
+
+### 1.安装
+```
+$ npm install --save @babel/runtime
+$ npm install --save-dev @babel/plugin-transform-runtime
+$ npm install --save @babel/runtime-corejs2
+```
+
+###  配置
+
+```javascript
+{
+  "presets": [['@babel/preset-env', { "debug": true }]],
+  "plugins": [
+    [
+      "@babel/plugin-proposal-decorators", { "decoratorsBeforeExport": true }
+    ],
+    [
+      "@babel/plugin-transform-runtime",
+      {
+        "corejs": 2,
+        "helpers": true,
+        "regenerator": true,
+        "useESModules": false
+      }
+    ]
+  ]
+}
+```
+
+## 15. 搭建react 开发环境
+src/App.js
+```javascript
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+const App = () => {
+  return (
+    <div>
+      <p>React here!</p>
+    </div>
+  )
+}
+
+export default App;
+
+ReactDOM.render(<App />, document.getElementById("app"));
+```
+
+### 1.插件安装
+* 安装react
+* 添加babel 预设@babel/preset-react
+```
+$ npm install react react-dom
+$ npm install --save-dev @babel/preset-react
+```
+![image](https://github.com/FanWorldBegin/webpack-guilde/blob/master/images/6.png)
+
+
+## 16. webpack 插件 html-webpack-plugin
+* plugin 扩展功能
+* loader 转化文件
+  
+### 1.html-webpack-plugin 作用
+index.html 是一个入口文件。插件解决手写HTML 问题， js文件的文件名是固定的
+![image](https://github.com/FanWorldBegin/webpack-guilde/blob/master/images/7.png)
+
+线上的js 名称带哈希值，为了cache 让浏览器能缓存文件，提高性能，浏览器缓存文件，如果文件内容改编后浏览器不知道，会使用之前旧的文件，
+为了避免这种状况，让浏览器知道文件更新重新下载。
+
+### 2.打包输出文件带哈希值
+webpack.config.js
+```
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: "[name]-[hash].bundle.js"
+  },
+```
+
+### 3.运行
+npm run dev
+![image](https://github.com/FanWorldBegin/webpack-guilde/blob/master/images/8.png)
+
+### 4.在HTML中动态引入
+#### 1. 安装插件
+  npm i --save-dev html-webpack-plugin
+
+#### 2.配置
+```javascript
+const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+
+module.exports = {
+  // entry: "./src/index.js",
+  ...
+  new HtmlWebpackPlugin({
+    title: 'Index',  //html 中tilte名字
+    filename: 'index.html', //生成文件名字
+    template: 'public/index.html', //使用的模板
+    chunks: ["app"]
+  })
+```
+
+#### 3.提供HTML模版
+![image](https://github.com/FanWorldBegin/webpack-guilde/blob/master/images/9.png)
