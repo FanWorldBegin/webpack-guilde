@@ -566,3 +566,24 @@ webpack.config.js
 ```
 
 ## 23.如何打包图片（包含规划编译出的文件的目录结构）
+### 1.配置file-loader
+```javascript
+npm install file-loader --save-dev
+```
+name  源文件一样的名字
+```javascript
+{
+  test: /\.(png|jpe?g|gif|svg)$/,
+  use: [{
+      loader: 'file-loader',
+      options: {
+        name: '[name].[ext]',
+        outputPath: 'images/'  //打包后的输出路径
+      }
+    },
+    {
+      loader: 'image-webpack-loader'
+    }
+  ]
+}
+```
