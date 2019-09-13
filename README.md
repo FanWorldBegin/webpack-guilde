@@ -127,3 +127,82 @@ npm run dev 打包出两个文件。
 <script src="./dist/app.bundle.js"></script>
 <script src="./dist/hello.bundle.js"></script>
 ```
+
+## 8.什么是Babel
+Bebel 是一个javascript 编译器,浏览器的语法会发展的慢一些.
+### polyfill
+腻子脚本，是一段Javascript代码，能够赋予浏览器未曾有过的功能。
+
+
+## 9.babel-loader 的介绍与安装
+### 1.loader
+loader官方解释是文件预处理器，通俗点说就是webpack在处理静态文件的时候，需要使用 loader 来加载各种文件，比如： html文件需要使用html-loader ,css 需要使用css-loader 、 style-loader 等等。
+### 2.babel-loader
+来处理ES6语法，将其编译为浏览器可以执行的js语法。
+
+* babel/core 核心库
+* babel/cli 命令行工具库
+* @babel 为了更好地归类，把相关依赖放在同一个目录中， 安装后在node_module 会放在同一个目录中
+### 3.第一步安装核心库
+因为不在命令行中使用所以不用@babel/cli
+npm install --save-dev @babel/core 
+
+### 4.安装webpack 插件
+babel-webpack结合使用这个库
+npm install -D babel-loader
+
+### 5.插件分类
+* 压缩的，处理css html --- Plugins
+* 处理文件格式转换的 --- Loaders
+
+
+## 10.安装babel 插件转换箭头函数
+```
+npm install --save-dev @babel/plugin-transform-arrow-functions
+```
+### 1.通过webpack使用babel插件
+![image](https://github.com/FanWorldBegin/webpack-guilde/blob/master/images/3.png)
+
+### 2.使用babel配置文件来使用插件
+会自动读取 .babelrc文件
+```javascript
+{
+  "plugins": ["babel/plugin-transform-arrow-functions"]
+}
+```
+
+### 3.更多插件
+.babelrc
+```javascript
+{
+  "plugins": ["@babel/plugin-transform-arrow-functions",
+              "@babel/plugin-transform-classes",
+              ["@babel/plugin-proposal-decorators", { "decoratorsBeforeExport": true }]]
+}
+```
+src/index.js
+.babelrc
+```javascript
+const greet = () => {
+  console.log('hi');
+}
+
+greet();
+
+class Test {
+  constructor(name) {
+    this.name = name;
+  }
+
+  logger () {
+    console.log("Hello", this.name);
+  }
+}
+//装饰器
+@annotation
+class MyClass { }
+
+function annotation(target) {
+   target.annotated = true;
+}
+```
