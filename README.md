@@ -182,13 +182,9 @@ npm install --save-dev @babel/plugin-transform-arrow-functions
 ```
 src/index.js
 .babelrc
+#### 1.转化class
+npm install --save-dev @babel/plugin-transform-classes
 ```javascript
-const greet = () => {
-  console.log('hi');
-}
-
-greet();
-
 class Test {
   constructor(name) {
     this.name = name;
@@ -198,11 +194,41 @@ class Test {
     console.log("Hello", this.name);
   }
 }
-//装饰器
-@annotation
-class MyClass { }
 
-function annotation(target) {
-   target.annotated = true;
+```
+
+#### 1.装饰器语法插件
+```javascript
+@decorator
+class A {
+
+}
+
+function decorator(target) {
+  target.index = 1;
+}
+
+ // A.index = 1
+```
+
+## 11. 用预设Presets   es6- babel- 插件打包加载
+### 1. 使用预设Presets
+统一处理ES6的语法而不用每次添加新的插件,集合一系列的插件组合在一起，不需要一个个插件添加，会自动添加.
+
+安装
+```javascript
+npm install --save-dev @babel/preset-env
+```
+
+### 2.babelrc 中配置
+```javascript
+{
+  "presets": [['@babel/preset-env', { "debug": true }]],
+  "plugins": [["@babel/plugin-proposal-decorators", { "decoratorsBeforeExport": true }]]
 }
 ```
+### 3.webpack中配置
+{ "debug": true }  --调试模式显示集合包含什么插件
+![image](https://github.com/FanWorldBegin/webpack-guilde/blob/master/images/4.png)
+
+
