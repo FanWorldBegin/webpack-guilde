@@ -18,3 +18,4 @@ webpack-demo
 ```
 ## 2.运行
 运行webpack  自动编译src / index.js 文件
+![image]()
